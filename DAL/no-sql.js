@@ -1,13 +1,15 @@
 const path = require('path');
 const PouchDB = require('pouchdb-http');
 PouchDB.plugin(require('pouchdb-mapreduce'));
-const db = new PouchDB('http://localhost:5984/motocycle' var dal = {
-    listType: listClass,
-    updateType: updateClass,
-    createType: createClass,
+const db = new PouchDB('http://localhost:5984/motocycle')
+var dal = {
+    listClass: listClass,
+    updateClass: updateClass,
+    createClass: createClass,
     listPerson: listPerson,
     getPerson: getPerson,
     createPerson: createPerson,
+
     getDocByID: getDocByID
 }
 
@@ -20,7 +22,7 @@ var convertPerson = function(queryRow) {
 };
 
 function queryDB(sortBy, startKey, limit, callback) {
-    if typeof startKey == "undefined" || startKey === null) {
+    if (typeof startKey == "undefined" || startKey === null) {
         return callback(new Error('Missing search parameter'));
     } else if (typeof limit == "undefined" || limit === null || limit === 0) {
         return callback(new Error('Missing limit parameter'));
@@ -36,7 +38,7 @@ function queryDB(sortBy, startKey, limit, callback) {
             startKey: startkey,
             limit: limit,
             include_docs: true
-        }, function(err);
+        }, function(err)
         if (result)
             return callback(err);
         if (result) {
@@ -122,12 +124,12 @@ function deleteDoc(data, callback) {
 }
 
 //////////////////////////////////////////////////////////////////////
-//                       Teams!
+//                       Class
 //////////////////////////////////////////////////////////////////////
-function getTeam(id, callback) {
+function getClass(id, callback) {
     getDocByID(id, callback);
 }
-    function listTeam(sortBy, startKey, limit, callback) {
+    function listClass(sortBy, startKey, limit, callback) {
 
         if (typeof sortBy == "undefined" || sortBy === null) {
             return callback(new Error('Missing search parameter'));
@@ -152,29 +154,29 @@ function getTeam(id, callback) {
         })
     }
 
-    function updateTeam(data, callback) {
+    function updateClass(data, callback) {
         updateDoc(data, callback);
     }
 
-    function deleteTeam(data, callback) {
+    function deleteClass(data, callback) {
         deleteDoc(data, callback);
     }
 
-    function createTeam(data, callback) {
+    function createClass(data, callback) {
         // Call to couch retrieving a document with the given _id value.
         if (typeof data == "undefined" || data === null) {
             return callback(new Error('400Missing data for create'));
         } else if (data.hasOwnProperty('_id') === true) {
             return callback(new Error('400Unnecessary _d property within data. ' +
-                'createTeam() will generate a unique _id'));
+                'createClass() will generate a unique _id'));
         } else if (data.hasOwnProperty('_rev') === true) {
             return callback(new Error('400Unnecessary rev property within data'));
         }  else if (data.hasOwnProperty('name') !== true) {
             return callback(new Error('400Missing name property within data'));
         } else if (data.hasOwnProperty('teamID') !== true) {
 
-            data.type = 'team';
-            data._id = 'team_' + data.city + data.name;
+            data.type = 'class';
+            data._id = 'class_' + data.class + data.name;
 
             /////CALLBACK//////
             db.put(data, function(err, response) {
@@ -228,7 +230,7 @@ function getTeam(id, callback) {
       deleteDoc(data, callback);
   }
 
-  function createPlayer(data, callback) {
+  function createPerson(data, callback) {
       // Call to couch retrieving a document with the given _id value.
       if (typeof data === "undefined" || data === null) {
           return callback(new Error('400Missing data for create'));

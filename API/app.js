@@ -1,181 +1,261 @@
-var http = require('http');
-var express = require('express')
-var app = express();
-const HTTPError = require('node-http-error');
-const port = process.env.PORT || 4000;
+const path = require('path');
+const PouchDB = require('pouchdb-http');
+PouchDB.plugin(require('pouchdb-mapreduce'));
+const db = new PouchDB('http://localhost:5984/motocycle' var dal = {
+    listClass: listClass,
+    updateClass: updateClass,
+    createClass: createClass,
+    listPerson: listPerson,
+    getPerson: getPerson,
+    createPerson: createPerson,
 
-const dal = require('../DAL/no-sql.js');
-var bodyParser = require('body-parser');
-app.use(bodyParser.json());
-var jsonParser = bodyParser.json();
+    getDocByID: getDocByID
+}
 
-///////////////Person//////////////////
-app.get('/team/:id', function(req, res, next) {
-    const teamID = req.params.id
-    console.log(teamID)
+////////////////////////////
+//////Utility functions/////
+///////////////////////////
+var convertPerson = function(queryRow) {
+    query.Row.doc.sortToken = queryRow.key;
+    return queryRow.doc;
+};
 
-    dal.getTeam(teamID, function callback(err, data) {
-        if (err) {
-            var responseError = BuildResponseError(err);
-            return next(new HTTPError(responseError.status, responseError.message, responseError));
+function queryDB(sortBy, startKey, limit, callback) {
+    if typeof startKey == "undefined" || startKey === null) {
+        return callback(new Error('Missing search parameter'));
+    } else if (typeof limit == "undefined" || limit === null || limit === 0) {
+        return callback(new Error('Missing limit parameter'));
+    } else {
+        limit = startkey === ''
+            ? Number(limit)
+            : Number(limit) + 1;
 
-        }
-        if (data) {
-            //      console.log('GET' + req.path, data)
-            res.append('Content-type', 'application/json');
-            res.status(200).send({data});
-        }
-    })
-})
+        console.log("sortBy:", sortBy, " startkey: ", startkey, " limit: ", limit)
 
-app.post('/team', function(req, res, next) {
-    console.log(req.body);
+        ////     CALLBACKS
+        db.query(sortBy, {
+            startKey: startkey,
+            limit: limit,
+            include_docs: true
+        }, function(err);
+        if (result)
+            return callback(err);
+        if (result) {
+            if (startkey !== '' && result.rows.length > 0) {
+                // remove first item
+                result.rows.shift();
+            }
+            return callback(null, result.rows.map(convertPerson));
+          }
+        });
+    }
 
-    dal.createTeam(req.body, function callback(err, data) {
-        if (err) {
-            var responseError = BuildResponseError(err);
-            return next(new HTTPError(responseError.status, responseError.message, responseError));
-        }
-        if (data) {
-            console.log('POST' + req.path, data)
-            res.append('Content-type', 'application/json');
-            res.status(201).send(data)
-        }
-    })
-})
-app.put('/team/:id', function(req, res, next) {
-    console.log(req.body);
+    function getDocByID(id, callback) {
+    // Call to couch retrieving a document with the given _id value.
+    if (typeof id == "undefined" || id === null) {
+        return callback(new Error('400Missing id parameter'));
+    } else {
+        //////     CALLBACKS
+        db.get(id, function(err, data) {
+            if (err)
+                return callback(err);
+            if (data)
+                return callback(null, data);
+            }
+        );
+    }
+}
 
-    dal.updateTeam(req.body, function(err, data) {
-        if (err) {
-            var responseError = BuildResponseError(err);
-            return next(new HTTPError(responseError.status, responseError.message, responseError));
+function createView(designDoc, callback) {
+    if (typeof designDoc == "undefined" || designDoc === null) {
+        return callback(new Error('400Missing design document.'));
+    } else {
+
+        ////     CALLBACKS
+        db.put(designDoc, function(err, response) {
+            if (err)
+                return callback(err);
+            if (response)
+                return callback(null, response);
+            }
+        );
+    }
+}
+
+function updateDoc(data, callback) {
+    // Call to couch retrieving a document with the given _id value.
+    if (typeof data == "undefined" || data === null) {
+        return callback(new Error('400Missing data for update'));
+    } else if (data.hasOwnProperty('_id') !== true) {
+        return callback(new Error('400Missing id property from data'));
+    } else if (data.hasOwnProperty('_rev') !== true) {
+        return callback(new Error('400Missing rev property from data'));
+    } else {
+
+        //////     CALLBACKS
+        db.put(data, function(err, response) {
+            if (err)
+                return callback(err);
+            if (response)
+                return callback(null, response);
+            }
+        );
+    }
+}
+function deleteDoc(data, callback) {
+    if (typeof data == "undefined" || data === null) {
+        return callback(new Error('400Missing data for delete'));
+    } else if (data.hasOwnProperty('_id') !== true) {
+        return callback(new Error('400Missing _id property from data'));
+    } else if (data.hasOwnProperty('_rev') !== true) {
+        return callback(new Error('400Missing _rev property from data'));
+    } else {
+        //////     CALLBACKS
+        db.remove(data, function(err, response) {
+            if (err)
+                return callback(err);
+            if (response)
+                return callback(null, response);
+            }
+        );
+    }
+
+}
+
+//////////////////////////////////////////////////////////////////////
+//                       Class
+//////////////////////////////////////////////////////////////////////
+function getClass(id, callback) {
+    getDocByID(id, callback);
+}
+    function listClass(sortBy, startKey, limit, callback) {
+
+        if (typeof sortBy == "undefined" || sortBy === null) {
+            return callback(new Error('Missing search parameter'));
         }
-        if (data) {
-            console.log('PUT' + req.path, data)
-            res.append('Content-type', 'application/json');
-            res.status(201).send(data)
-        }
-    })
-})
-app.delete('/team/:id', function(req, res, next) {
-    const teamID = req.params.id;
-    dal.getTeam(teamID, function callback(err, data) {
-        if (err) {
-            var responseError = BuildResponseError(err);
-            return next(new HTTPError(responseError.status, responseError.message, responseError));
-        }
-        if (data) {
-            dal.deleteTeam(data, function callback(deletederr, deleteddata) {
-                if (deletederr) {
-                    var responseError = BuildResponseError(deletederr);
-                    return next(new HTTPError(responseError.status, responseError.message, responseError));
+
+        limit = startKey !== ''
+            ? limit + 1
+            : limit
+
+        db.query(sortBy, {
+            startkey: startKey,
+            limit: limit
+        }, function(err, data) {
+            if (err)
+                return callback(err)
+
+            if (startKey !== '') {
+                data.rows.shift()
+            }
+
+            callback(null, data)
+        })
+    }
+
+    function updateClass(data, callback) {
+        updateDoc(data, callback);
+    }
+
+    function deleteClass(data, callback) {
+        deleteDoc(data, callback);
+    }
+
+    function createClass(data, callback) {
+        // Call to couch retrieving a document with the given _id value.
+        if (typeof data == "undefined" || data === null) {
+            return callback(new Error('400Missing data for create'));
+        } else if (data.hasOwnProperty('_id') === true) {
+            return callback(new Error('400Unnecessary _d property within data. ' +
+                'createClass() will generate a unique _id'));
+        } else if (data.hasOwnProperty('_rev') === true) {
+            return callback(new Error('400Unnecessary rev property within data'));
+        }  else if (data.hasOwnProperty('name') !== true) {
+            return callback(new Error('400Missing name property within data'));
+        } else if (data.hasOwnProperty('teamID') !== true) {
+
+            data.type = 'class';
+            data._id = 'class_' + data.class + data.name;
+
+            /////CALLBACK//////
+            db.put(data, function(err, response) {
+                if (err)
+                    return callback(err);
+                if (response)
+                    return callback(null, response);
                 }
-                if (deleteddata) {
-                    console.log('DELETE' + req.path, deleteddata)
-                    res.append('Content-type', 'application/json');
-                    res.status(201).send(deleteddata);
+            );
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    //                              Person
+    ///////////////////////////////////////////////////////////////////////////
+    function getPerson(id, callback) {
+            getDocByID(id, callback);
+        }
+
+        function listPerson(sortBy, startKey, limit, callback) {
+            queryDB(sortBy, startKey, limit, callback);
+
+            //validate our params
+            if (typeof sortBy == "undefined" || sortBy === null) {
+                return callback(new Error('Missing search parameter'));
+            }
+
+            limit = startKey !== ''
+                ? limit + 1
+                : limit
+
+            db.query(sortBy, {
+                startkey: startKey,
+                limit: limit
+            }, function(err, data) {
+                if (err)
+                    return callback(err)
+
+                if (startKey !== '') {
+                    data.rows.shift()
                 }
+
+                callback(null, data)
             })
         }
-    })
-})
-app.get('/', function(req, res, next){
-  const sortByParam = req.query.sortBy || 'team';
-  const sortBy = getPersonSortBy(sortByParam, 'nosql')
-  const sortToken = req.query.sortToken || "";
-  const limit = req.query.limit || 5;
+        function updatePerson(data, callback) {
+      updateDoc(data, callback);
+  }
 
-  dal.listPeron(sortBy, sortToken, limit, function callback(err, data) {
-    if(err){
-      var responseError = BuildResponseError(err);
-      return next(new HTTPError(responseError.status, responseError.message, responseError));
-    }
-    if (data) {
-        console.log('GET' + req.path, "query:", req.query, data)
-        res.append('Content-type', 'application/json');
-        res.status(201).send(data);
-    }
-  })
-})
-//////
-///////////////Sort function/////////
-///////
+  function deletePerson(data, callback) {
+      deleteDoc(data, callback);
+  }
 
-function getPersonSortBy(type, dalModule) {
-    var sortBy;
-    var options = {
-        'room': function() {
-            sortBy = dalModule === 'nosql' ? 'roomView' : 'vroom';
-        },
-        'class': function() {
-            //email
-            sortBy = dalModule === 'nosql' ? 'classView' : 'vclass';
-        },
-      'lastName': function() {
-          sortBy = dalModule === 'nosql' ? 'lastNameView' : 'vlstnName';
+  function createPerson(data, callback) {
+      // Call to couch retrieving a document with the given _id value.
+      if (typeof data === "undefined" || data === null) {
+          return callback(new Error('400Missing data for create'));
+      } else if (data.hasOwnProperty('_id') === true) {
+          return callback(new Error('400Unnecessary id property within data.'));
+      } else if (data.hasOwnProperty('_rev') === true) {
+          return callback(new Error('400Unnecessary rev property within data'));
+      } else if (data.hasOwnProperty('lastName') !== true) {
+          return callback(new Error('400Missing lastName property within data'));
+      } else if (data.hasOwnProperty('firstName') !== true) {
+          return callback(new Error('400Missing firstName property within data'));
+      } else {
+
+          data.active = true;
+          data.type = 'person';
+          data._id = 'person_' + data.lastName + data.firstName;
+
+          //////     CALLBACKS
+          db.put(data, function(err, response) {
+              if (err)
+                  return callback(err);
+              if (response)
+                  return callback(null, response);
+              }
+          );
       }
-        //'default': function() {
-      //      sortBy = dalModule === 'nosql' ? 'teamView' : 'vTeam';
-    //    }
-    };
-    // invoke it
-    (options[type] || options['default'])();
-    // return a String with chosen sort
-    return sortBy;
-}
+  }
 
-
-
-
-
-
-
-//////
-///////Error function//////
-/////
-
-function BuildResponseError(err) {
-
-  const statuscheck = isNaN(err.message.substring(0, 3)) === true
-        ? "400"
-        : err.message.substring(0, 3)
-    const status = err.status
-        ? Number(err.status)
-        : Number(statuscheck)
-    const message = err.status
-        ? err.message
-        : err.message.substring(3)
-    const reason = message
-    const error = status === 400
-        ? "Bad Request"
-        : err.name
-    const name = error
-
-    var errormsg = {}
-    errormsg.error = error
-    errormsg.reason = reason
-    errormsg.name = name
-    errormsg.status = status
-    errormsg.message = message
-
-    //   { error: 'Bad Request',
-    // reason: 'Missing email property within data',
-    // name: 'Bad Request',
-    // status: 400,
-    // message: 'Missing email property within data' }
-    //console.log("BuildResponseError-->", errormsg)
-    return errormsg
-}
-
-
-app.use(function(err, req, res, next) {
-    console.log('error handler')
-    console.log(req.method, ' ', req.path, " err: ", err)
-    res.status(err.status || 400);
-    res.send(err)
-});
-
-app.listen(4000, function() {
-    console.log('Example app listening on port 4000!');
-})
+  module.exports = dal;
