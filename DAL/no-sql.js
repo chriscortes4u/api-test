@@ -1,7 +1,8 @@
 const path = require('path');
 const PouchDB = require('pouchdb-http');
 PouchDB.plugin(require('pouchdb-mapreduce'));
-const db = new PouchDB('http://localhost:5984/motocycle')
+const db = new PouchDB('http://localhost:5984/api-test')
+
 var dal = {
     listClass: listClass,
     updateClass: updateClass,
@@ -13,16 +14,18 @@ var dal = {
     updatePerson: updatePerson,
     listMaker: listMaker,
     updateMaker: updateMaker,
-    createMaker:  createMaker,
+    createMaker: createMaker,
     getMaker: getMaker,
+    createView: createView,
     getDocByID: getDocByID
-}
+
+};
 
 ////////////////////////////
 //////Utility functions/////
 ///////////////////////////
 var convertPerson = function(queryRow) {
-    query.Row.doc.sortToken = queryRow.key;
+    query.Row.doc.maker = queryRow.key;
     return queryRow.doc;
 };
 
@@ -38,102 +41,102 @@ function queryDB(sortBy, startKey, limit, callback) {
 
         console.log("sortBy:", sortBy, " startkey: ", startkey, " limit: ", limit)
 
-        ////     CALLBACKS
+        ////     CALLBACKS ////
         db.query(sortBy, {
             startKey: startkey,
             limit: limit,
             include_docs: true
-        }, function(err, result){
-        if (err)
-            return callback(err);
-        if (result) {
-            if (startkey !== '' && result.rows.length > 0) {
-                // remove first item
-                result.rows.shift();
+        }, function(err, result) {
+            if (err)
+                return callback(err);
+            if (result) {
+                if (startkey !== '' && result.rows.length > 0) {
+                    // remove first item
+                    result.rows.shift();
+                }
+                return callback(null, result.rows.map(convertPerson));
             }
-            return callback(null, result.rows.map(convertPerson));
-          }
         });
     }
-
+}
     function getDocByID(id, callback) {
-    // Call to couch retrieving a document with the given _id value.
-    if (typeof id == "undefined" || id === null) {
-        return callback(new Error('400Missing id parameter'));
-    } else {
-        //////     CALLBACKS
-        db.get(id, function(err, data) {
-            if (err)
-                return callback(err);
-            if (data)
-                return callback(null, data);
-            }
-        );
-    }
-}
-
-function createView(designDoc, callback) {
-    if (typeof designDoc == "undefined" || designDoc === null) {
-        return callback(new Error('400Missing design document.'));
-    } else {
-
-        ////     CALLBACKS
-        db.put(designDoc, function(err, response) {
-            if (err)
-                return callback(err);
-            if (response)
-                return callback(null, response);
-            }
-        );
-    }
-}
-
-function updateDoc(data, callback) {
-    // Call to couch retrieving a document with the given _id value.
-    if (typeof data == "undefined" || data === null) {
-        return callback(new Error('400Missing data for update'));
-    } else if (data.hasOwnProperty('_id') !== true) {
-        return callback(new Error('400Missing id property from data'));
-    } else if (data.hasOwnProperty('_rev') !== true) {
-        return callback(new Error('400Missing rev property from data'));
-    } else {
-
-        //////     CALLBACKS
-        db.put(data, function(err, response) {
-            if (err)
-                return callback(err);
-            if (response)
-                return callback(null, response);
-            }
-        );
-    }
-}
-function deleteDoc(data, callback) {
-    if (typeof data == "undefined" || data === null) {
-        return callback(new Error('400Missing data for delete'));
-    } else if (data.hasOwnProperty('_id') !== true) {
-        return callback(new Error('400Missing _id property from data'));
-    } else if (data.hasOwnProperty('_rev') !== true) {
-        return callback(new Error('400Missing _rev property from data'));
-    } else {
-        //////     CALLBACKS
-        db.remove(data, function(err, response) {
-            if (err)
-                return callback(err);
-            if (response)
-                return callback(null, response);
-            }
-        );
+        // Call to couch retrieving a document with the given _id value.
+        if (typeof id == "undefined" || id === null) {
+            return callback(new Error('400Missing id parameter'));
+        } else {
+            //////     CALLBACKS
+            db.get(id, function(err, data) {
+                if (err)
+                    return callback(err);
+                if (data)
+                    return callback(null, data);
+                }
+            );
+        }
     }
 
-}
+    function createView(designDoc, callback) {
+        if (typeof designDoc == "undefined" || designDoc === null) {
+            return callback(new Error('400Missing design document.'));
+        } else {
 
-//////////////////////////////////////////////////////////////////////
-//                       Class
-//////////////////////////////////////////////////////////////////////
-function getClass(id, callback) {
-    getDocByID(id, callback);
-}
+            ////     CALLBACKS
+            db.put(designDoc, function(err, response) {
+                if (err)
+                    return callback(err);
+                if (response)
+                    return callback(null, response);
+                }
+            );
+        }
+    }
+
+    function updateDoc(data, callback) {
+        // Call to couch retrieving a document with the given _id value.
+        if (typeof data == "undefined" || data === null) {
+            return callback(new Error('400Missing data for update'));
+        } else if (data.hasOwnProperty('_id') !== true) {
+            return callback(new Error('400Missing id property from data'));
+        } else if (data.hasOwnProperty('_rev') !== true) {
+            return callback(new Error('400Missing rev property from data'));
+        } else {
+
+            //////     CALLBACKS
+            db.put(data, function(err, response) {
+                if (err)
+                    return callback(err);
+                if (response)
+                    return callback(null, response);
+                }
+            );
+        }
+    }
+    function deleteDoc(data, callback) {
+        if (typeof data == "undefined" || data === null) {
+            return callback(new Error('400Missing data for delete'));
+        } else if (data.hasOwnProperty('_id') !== true) {
+            return callback(new Error('400Missing _id property from data'));
+        } else if (data.hasOwnProperty('_rev') !== true) {
+            return callback(new Error('400Missing _rev property from data'));
+        } else {
+            //////     CALLBACKS
+            db.remove(data, function(err, response) {
+                if (err)
+                    return callback(err);
+                if (response)
+                    return callback(null, response);
+                }
+            );
+        }
+
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    //                       Class
+    //////////////////////////////////////////////////////////////////////
+    function getClass(id, callback) {
+        getDocByID(id, callback);
+    }
     function listClass(sortBy, startKey, limit, callback) {
 
         if (typeof sortBy == "undefined" || sortBy === null) {
@@ -167,6 +170,7 @@ function getClass(id, callback) {
         deleteDoc(data, callback);
     }
 
+
     function createClass(data, callback) {
         // Call to couch retrieving a document with the given _id value.
         if (typeof data == "undefined" || data === null) {
@@ -176,12 +180,12 @@ function getClass(id, callback) {
                 'createClass() will generate a unique _id'));
         } else if (data.hasOwnProperty('_rev') === true) {
             return callback(new Error('400Unnecessary rev property within data'));
-        }  else if (data.hasOwnProperty('name') !== true) {
+        } else if (data.hasOwnProperty('name') !== true) {
             return callback(new Error('400Missing name property within data'));
         } else if (data.hasOwnProperty('teamID') !== true) {
 
             data.type = 'class';
-            data._id = 'class_' + data.class + data.name;
+            data._id = 'class_' + data.class + data.fistName;
 
             /////CALLBACK//////
             db.put(data, function(err, response) {
@@ -198,78 +202,78 @@ function getClass(id, callback) {
     //                              Person
     ///////////////////////////////////////////////////////////////////////////
     function getPerson(id, callback) {
-            getDocByID(id, callback);
+        getDocByID(id, callback);
+    }
+
+    function listPerson(sortBy, startKey, limit, callback) {
+        queryDB(sortBy, startKey, limit, callback);
+
+        //validate our params
+        if (typeof sortBy == "undefined" || sortBy === null) {
+            return callback(new Error('Missing search parameter'));
         }
 
-        function listPerson(sortBy, startKey, limit, callback) {
-            queryDB(sortBy, startKey, limit, callback);
+        limit = startKey !== ''
+            ? limit + 1
+            : limit
 
-            //validate our params
-            if (typeof sortBy == "undefined" || sortBy === null) {
-                return callback(new Error('Missing search parameter'));
+        db.query(sortBy, {
+            startkey: startKey,
+            limit: limit
+        }, function(err, data) {
+            if (err)
+                return callback(err)
+
+            if (startKey !== '') {
+                data.rows.shift()
             }
 
-            limit = startKey !== ''
-                ? limit + 1
-                : limit
+            callback(null, data)
+        })
+    }
+    function updatePerson(data, callback) {
+        updateDoc(data, callback);
+    }
 
-            db.query(sortBy, {
-                startkey: startKey,
-                limit: limit
-            }, function(err, data) {
+    function deletePerson(data, callback) {
+        deleteDoc(data, callback);
+    }
+
+    function createPerson(data, callback) {
+        // Call to couch retrieving a document with the given _id value.
+        if (typeof data === "undefined" || data === null) {
+            return callback(new Error('400Missing data for create'));
+        } else if (data.hasOwnProperty('_id') === true) {
+            return callback(new Error('400Unnecessary id property within data.'));
+        } else if (data.hasOwnProperty('_rev') === true) {
+            return callback(new Error('400Unnecessary rev property within data'));
+        } else if (data.hasOwnProperty('lastName') !== true) {
+            return callback(new Error('400Missing lastName property within data'));
+        } else if (data.hasOwnProperty('firstName') !== true) {
+            return callback(new Error('400Missing firstName property within data'));
+        } else {
+
+            data.active = true;
+            data.type = 'person';
+            data._id = 'person_' + data.firstName + data.lastName;
+
+            //////     CALLBACKS
+            db.put(data, function(err, response) {
                 if (err)
-                    return callback(err)
-
-                if (startKey !== '') {
-                    data.rows.shift()
+                    return callback(err);
+                if (response)
+                    return callback(null, response);
                 }
-
-                callback(null, data)
-            })
+            );
         }
-        function updatePerson(data, callback) {
-      updateDoc(data, callback);
-  }
+    }
 
-  function deletePerson(data, callback) {
-      deleteDoc(data, callback);
-  }
-
-  function createPerson(data, callback) {
-      // Call to couch retrieving a document with the given _id value.
-      if (typeof data === "undefined" || data === null) {
-          return callback(new Error('400Missing data for create'));
-      } else if (data.hasOwnProperty('_id') === true) {
-          return callback(new Error('400Unnecessary id property within data.'));
-      } else if (data.hasOwnProperty('_rev') === true) {
-          return callback(new Error('400Unnecessary rev property within data'));
-      } else if (data.hasOwnProperty('lastName') !== true) {
-          return callback(new Error('400Missing lastName property within data'));
-      } else if (data.hasOwnProperty('firstName') !== true) {
-          return callback(new Error('400Missing firstName property within data'));
-      } else {
-
-          data.active = true;
-          data.type = 'person';
-          data._id = 'person_' + data.lastName + data.firstName;
-
-          //////     CALLBACKS
-          db.put(data, function(err, response) {
-              if (err)
-                  return callback(err);
-              if (response)
-                  return callback(null, response);
-              }
-          );
-      }
-  }
-
-/////////////////////////////
-////////////////Maker/////////
-/////////////////////////////
-function getMaker(id, callback) {
-    getDocByID(id, callback);
-}
+    /////////////////////////////
+    ////////////////Maker/////////
+    /////////////////////////////
+    function getMaker(id, callback) {
+        getDocByID(id, callback);
+    }
     function listMaker(sortBy, startKey, limit, callback) {
 
         if (typeof sortBy == "undefined" || sortBy === null) {
@@ -312,12 +316,8 @@ function getMaker(id, callback) {
                 'createMaker() will generate a unique _id'));
         } else if (data.hasOwnProperty('_rev') === true) {
             return callback(new Error('400Unnecessary rev property within data'));
-        }  else if (data.hasOwnProperty('name') !== true) {
-            return callback(new Error('400Missing name property within data'));
-        } else if (data.hasOwnProperty('makerID') !== true) {
-
             data.type = 'maker';
-            data._id = 'maker_' + data.maker + data.name;
+            data._id = 'maker_' + data.maker + data.firstName;
 
             /////CALLBACK//////
             db.put(data, function(err, response) {
@@ -330,6 +330,4 @@ function getMaker(id, callback) {
         }
     }
 
-
-
-  module.exports = dal;
+    module.exports = dal;

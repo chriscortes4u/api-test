@@ -5,7 +5,7 @@ var designDoc = {
   views: {
     'person':{
       map: function(doc) {
-        if (doc.type === 'person'){
+        if (doc.type === "person"){
           emit(doc.name);
           }
       }.toString()
@@ -18,7 +18,7 @@ var designDoc2 = {
   views:{
     'class':{
       map: function(doc) {
-        if (doc.type === 'class'){
+        if (doc.type === "class"){
           emit(doc.class + doc_id);
         }
       }.toString()
@@ -27,11 +27,11 @@ var designDoc2 = {
 }
 
 var designDoc3 ={
-  _id: 'design/maker',
+  _id: '_design/maker',
   views:{
     'maker':{
       map: function(doc){
-        if (doc.type === 'maker'){
+        if (doc.type === "maker"){
           emmit(doc.maker + doc._id);
         }
       }.toString()

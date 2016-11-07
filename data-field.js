@@ -60,7 +60,22 @@ const personData = [{
     class: "sportbike",
     maker: "suzuki",
     year: "2016"
+}];
+
+const classData =[{
+  class: "touring",
+  class: "sportbike",
+  class: "scooter",
+  class: "cruiser"
 }]
+
+const makerData = [{
+  maker: "suzuki",
+  maker: "Honda",
+  maker: "Vespa",
+  maker: "Harley Davidson"
+}]
+
 
 function callback (msgHeader) {
   return function (err, response) {
@@ -71,4 +86,12 @@ function callback (msgHeader) {
 
 personData.forEach(function(person) {
   dalNoSQL.createPerson(person, callback('PERSON CREATED:\n'))
-})
+});
+
+classData.forEach(function(class) {
+  dalNoSQL.createClass(class, callback('CLASS CREATED:\n'))
+});
+
+makerData.forEach(function(maker) {
+  dalNoSQL.createMaker(maker, callback('Maker CREATED:\n'))
+});

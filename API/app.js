@@ -11,10 +11,10 @@ var jsonParser = bodyParser.json();
 
 ///////////////Person//////////////////
 app.get('/person/:id', function(req, res, next) {
-    const teamID = req.params.id
-    console.log(teamID)
+    const personID = req.params.id
+    console.log(personID)
 
-    dal.getmotocycle(personID, function callback(err, data) {
+    dal.getPerson(personID, function callback(err, data) {
         if (err) {
             var responseError = BuildResponseError(err);
             return next(new HTTPError(responseError.status, responseError.message, responseError));
@@ -80,7 +80,7 @@ app.delete('/person/:id', function(req, res, next) {
         }
     })
 })
-app.get('/person', function(req, res, next){
+app.get('/person/', function(req, res, next){
   const sortByParam = req.query.sortBy || 'person';
   const sortBy = getPersonSortBy(sortByParam, 'nosql')
   const sortToken = req.query.sortToken || "";
@@ -98,6 +98,201 @@ app.get('/person', function(req, res, next){
     }
   })
 })
+/////////////
+/////Class///
+////////////
+
+app.get('/class/:id', function(req, res, next) {
+    const classID = req.params.id
+    console.log(classID)
+
+    dal.getClass(classID, function callback(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+
+        }
+        if (data) {
+            //      console.log('GET' + req.path, data)
+            res.append('Content-type', 'application/json');
+            res.status(200).send({data});
+        }
+    })
+})
+
+app.post('/class', function(req, res, next) {
+    console.log(req.body);
+
+    dal.createClass(req.body, function callback(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+        }
+        if (data) {
+            console.log('POST' + req.path, data)
+            res.append('Content-type', 'application/json');
+            res.status(201).send(data)
+        }
+    })
+})
+app.put('/class/:id', function(req, res, next) {
+    console.log(req.body);
+
+    dal.updateClass(req.body, function(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+        }
+        if (data) {
+            console.log('PUT' + req.path, data)
+            res.append('Content-type', 'application/json');
+            res.status(201).send(data)
+        }
+    })
+})
+app.delete('/class/:id', function(req, res, next) {
+    const classID = req.params.id;
+    dal.getClass(classID, function callback(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+        }
+        if (data) {
+            dal.deleteClass(data, function callback(deletederr, deleteddata) {
+                if (deletederr) {
+                    var responseError = BuildResponseError(deletederr);
+                    return next(new HTTPError(responseError.status, responseError.message, responseError));
+                }
+                if (deleteddata) {
+                    console.log('DELETE' + req.path, deleteddata)
+                    res.append('Content-type', 'application/json');
+                    res.status(201).send(deleteddata);
+                }
+            })
+        }
+    })
+})
+app.get('/class', function(req, res, next){
+  const sortByParam = req.query.sortBy || 'class';
+  const sortBy = getClassSortBy(sortByParam, 'nosql')
+  const sortToken = req.query.sortToken || "";
+  const limit = req.query.limit || 3;
+
+  dal.listClass(sortBy, sortToken, limit, function callback(err, data) {
+    if(err){
+      var responseError = BuildResponseError(err);
+      return next(new HTTPError(responseError.status, responseError.message, responseError));
+    }
+    if (data) {
+        console.log('GET' + req.path, "query:", req.query, data)
+        res.append('Content-type', 'application/json');
+        res.status(201).send(data);
+    }
+  })
+})
+////////////
+////Maker///
+///////////
+app.get('/maker/:id', function(req, res, next) {
+    const makerID = req.params.id
+    console.log(makerID)
+
+    dal.getMaker(makerID, function callback(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+
+        }
+        if (data) {
+            //      console.log('GET' + req.path, data)
+            res.append('Content-type', 'application/json');
+            res.status(200).send({data});
+        }
+    })
+})
+
+app.post('/maker', function(req, res, next) {
+    console.log(req.body);
+
+    dal.createMaker(req.body, function callback(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+        }
+        if (data) {
+            console.log('POST' + req.path, data)
+            res.append('Content-type', 'application/json');
+            res.status(201).send(data)
+        }
+    })
+})
+app.put('/maker/:id', function(req, res, next) {
+    console.log(req.body);
+
+    dal.updateMaker(req.body, function(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+        }
+        if (data) {
+            console.log('PUT' + req.path, data)
+            res.append('Content-type', 'application/json');
+            res.status(201).send(data)
+        }
+    })
+})
+app.delete('/maker/:id', function(req, res, next) {
+    const makerID = req.params.id;
+    dal.getMaker(makerID, function callback(err, data) {
+        if (err) {
+            var responseError = BuildResponseError(err);
+            return next(new HTTPError(responseError.status, responseError.message, responseError));
+        }
+        if (data) {
+            dal.deleteMaker(data, function callback(deletederr, deleteddata) {
+                if (deletederr) {
+                    var responseError = BuildResponseError(deletederr);
+                    return next(new HTTPError(responseError.status, responseError.message, responseError));
+                }
+                if (deleteddata) {
+                    console.log('DELETE' + req.path, deleteddata)
+                    res.append('Content-type', 'application/json');
+                    res.status(201).send(deleteddata);
+                }
+            })
+        }
+    })
+})
+app.get('/maker', function(req, res, next){
+  const sortByParam = req.query.sortBy || 'person';
+  const sortBy = getMakerSortBy(sortByParam, 'nosql')
+  const sortToken = req.query.sortToken || "";
+  const limit = req.query.limit || 3;
+
+  dal.listMaker(sortBy, sortToken, limit, function callback(err, data) {
+    if(err){
+      var responseError = BuildResponseError(err);
+      return next(new HTTPError(responseError.status, responseError.message, responseError));
+    }
+    if (data) {
+        console.log('GET' + req.path, "query:", req.query, data)
+        res.append('Content-type', 'application/json');
+        res.status(201).send(data);
+    }
+  })
+})
+
+
+
+
+
+
+
+
+
+
+
+
 //////
 ///////////////Sort function/////////
 ///////
