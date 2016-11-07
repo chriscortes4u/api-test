@@ -320,7 +320,50 @@ function getPersonSortBy(type, dalModule) {
     return sortBy;
 }
 
-
+function getClassSortBy(type, dalModule) {
+    var sortBy;
+    var options = {
+        'person': function() {
+            sortBy = dalModule === 'nosql' ? 'personView' : 'vperson';
+        },
+        'class': function() {
+            //email
+            sortBy = dalModule === 'nosql' ? 'classView' : 'vclass';
+        },
+      'lastName': function() {
+          sortBy = dalModule === 'nosql' ? 'lastNameView' : 'vlstnName';
+      }
+        //'default': function() {
+      //      sortBy = dalModule === 'nosql' ? 'teamView' : 'vTeam';
+    //    }
+    };
+    // invoke it
+    (options[type] || options['default'])();
+    // return a String with chosen sort
+    return sortBy;
+}
+function getMakerSortBy(type, dalModule) {
+    var sortBy;
+    var options = {
+        'person': function() {
+            sortBy = dalModule === 'nosql' ? 'person' : 'vperson';
+        },
+        'class': function() {
+            //email
+            sortBy = dalModule === 'nosql' ? 'class' : 'vclass';
+        },
+      'maker': function() {
+          sortBy = dalModule === 'nosql' ? 'maker' : 'vmaker';
+      }
+        //'default': function() {
+      //      sortBy = dalModule === 'nosql' ? 'teamView' : 'vTeam';
+    //    }
+    };
+    // invoke it
+    (options[type] || options['default'])();
+    // return a String with chosen sort
+    return sortBy;
+}
 
 
 

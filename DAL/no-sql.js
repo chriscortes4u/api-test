@@ -25,7 +25,7 @@ var dal = {
 //////Utility functions/////
 ///////////////////////////
 var convertPerson = function(queryRow) {
-    query.Row.doc.maker = queryRow.key;
+    query.Row.doc.sortToken = queryRow.key;
     return queryRow.doc;
 };
 
@@ -59,6 +59,83 @@ function queryDB(sortBy, startKey, limit, callback) {
         });
     }
 }
+var convertClass = function(queryRow) {
+    query.Row.doc.sortToken = queryRow.key;
+    return queryRow.doc;
+};
+
+function queryDBclass(sortBy, startKey, limit, callback) {
+    if (typeof startKey == "undefined" || startKey === null) {
+        return callback(new Error('Missing search parameter'));
+    } else if (typeof limit == "undefined" || limit === null || limit === 0) {
+        return callback(new Error('Missing limit parameter'));
+    } else {
+        limit = startkey === ''
+            ? Number(limit)
+            : Number(limit) + 1;
+
+        console.log("sortBy:", sortBy, " startkey: ", startkey, " limit: ", limit)
+
+        ////     CALLBACKS ////
+        db.query(sortBy, {
+            startKey: startkey,
+            limit: limit,
+            include_docs: true
+        }, function(err, result) {
+            if (err)
+                return callback(err);
+            if (result) {
+                if (startkey !== '' && result.rows.length > 0) {
+                    // remove first item
+                    result.rows.shift();
+                }
+                return callback(null, result.rows.map(convertClass));
+            }
+        });
+    }
+}
+var convertMaker = function(queryRow) {
+    query.Row.doc.sortToken = queryRow.key;
+    return queryRow.doc;
+};
+
+function queryDBmaker(sortBy, startKey, limit, callback) {
+    if (typeof startKey == "undefined" || startKey === null) {
+        return callback(new Error('Missing search parameter'));
+    } else if (typeof limit == "undefined" || limit === null || limit === 0) {
+        return callback(new Error('Missing limit parameter'));
+    } else {
+        limit = startkey === ''
+            ? Number(limit)
+            : Number(limit) + 1;
+
+        console.log("sortBy:", sortBy, " startkey: ", startkey, " limit: ", limit)
+
+        ////     CALLBACKS ////
+        db.query(sortBy, {
+            startKey: startkey,
+            limit: limit,
+            include_docs: true
+        }, function(err, result) {
+            if (err)
+                return callback(err);
+            if (result) {
+                if (startkey !== '' && result.rows.length > 0) {
+                    // remove first item
+                    result.rows.shift();
+                }
+                return callback(null, result.rows.map(convertMaker));
+            }
+        });
+    }
+}
+
+
+
+
+
+
+
     function getDocByID(id, callback) {
         // Call to couch retrieving a document with the given _id value.
         if (typeof id == "undefined" || id === null) {
@@ -180,10 +257,7 @@ function queryDB(sortBy, startKey, limit, callback) {
                 'createClass() will generate a unique _id'));
         } else if (data.hasOwnProperty('_rev') === true) {
             return callback(new Error('400Unnecessary rev property within data'));
-        } else if (data.hasOwnProperty('name') !== true) {
-            return callback(new Error('400Missing name property within data'));
-        } else if (data.hasOwnProperty('teamID') !== true) {
-
+        
             data.type = 'class';
             data._id = 'class_' + data.class + data.fistName;
 

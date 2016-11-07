@@ -1,4 +1,4 @@
-const dalNoSQL= require('./DAL/no-sql.js');
+const dal= require('./DAL/no-sql.js');
 
 var designDoc = {
   _id: '_design/person',

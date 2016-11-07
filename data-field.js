@@ -1,4 +1,4 @@
-const dalNoSQL = require('./DAL/no-sql.js');
+const dal = require('./DAL/no-sql.js');
 
 const personData = [{
     firstName: "Joe",
@@ -87,13 +87,13 @@ function callback(msgHeader) {
 }
 
 personData.forEach(function(person) {
-  dalNoSQL.createPerson(person, callback('PERSON CREATED:\n'))
+  dal.createPerson(person, callback('PERSON CREATED:\n'))
 });
 
-classData.forEach(function(class) {
-    dalNoSQL.createClass(class, callback('CLASS CREATED:\n'))
+classData.forEach(function(classData) {
+    dal.createClass(classData, callback('CLASS CREATED:\n'))
 });
 
-makerData.forEach(function(maker) {
-    dalNoSQL.createMaker(maker, callback('Maker CREATED:\n'))
+makerData.forEach(function(makerData) {
+    dal.createMaker(makerData, callback('Maker CREATED:\n'))
 });
