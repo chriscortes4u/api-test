@@ -6,10 +6,15 @@ var dal = {
     listClass: listClass,
     updateClass: updateClass,
     createClass: createClass,
+    getClass: getClass,
     listPerson: listPerson,
     getPerson: getPerson,
     createPerson: createPerson,
-
+    updatePerson: updatePerson,
+    listMaker: listMaker,
+    updateMaker: updateMaker,
+    createMaker:  createMaker,
+    getMaker: getMaker,
     getDocByID: getDocByID
 }
 
@@ -38,8 +43,8 @@ function queryDB(sortBy, startKey, limit, callback) {
             startKey: startkey,
             limit: limit,
             include_docs: true
-        }, function(err)
-        if (result)
+        }, function(err, result){
+        if (err)
             return callback(err);
         if (result) {
             if (startkey !== '' && result.rows.length > 0) {
@@ -258,5 +263,73 @@ function getClass(id, callback) {
           );
       }
   }
+
+/////////////////////////////
+////////////////Maker/////////
+/////////////////////////////
+function getMaker(id, callback) {
+    getDocByID(id, callback);
+}
+    function listMaker(sortBy, startKey, limit, callback) {
+
+        if (typeof sortBy == "undefined" || sortBy === null) {
+            return callback(new Error('Missing search parameter'));
+        }
+
+        limit = startKey !== ''
+            ? limit + 1
+            : limit
+
+        db.query(sortBy, {
+            startkey: startKey,
+            limit: limit
+        }, function(err, data) {
+            if (err)
+                return callback(err)
+
+            if (startKey !== '') {
+                data.rows.shift()
+            }
+
+            callback(null, data)
+        })
+    }
+
+    function updateMaker(data, callback) {
+        updateDoc(data, callback);
+    }
+
+    function deleteMaker(data, callback) {
+        deleteDoc(data, callback);
+    }
+
+    function createMaker(data, callback) {
+        // Call to couch retrieving a document with the given _id value.
+        if (typeof data == "undefined" || data === null) {
+            return callback(new Error('400Missing data for create'));
+        } else if (data.hasOwnProperty('_id') === true) {
+            return callback(new Error('400Unnecessary _d property within data. ' +
+                'createMaker() will generate a unique _id'));
+        } else if (data.hasOwnProperty('_rev') === true) {
+            return callback(new Error('400Unnecessary rev property within data'));
+        }  else if (data.hasOwnProperty('name') !== true) {
+            return callback(new Error('400Missing name property within data'));
+        } else if (data.hasOwnProperty('makerID') !== true) {
+
+            data.type = 'maker';
+            data._id = 'maker_' + data.maker + data.name;
+
+            /////CALLBACK//////
+            db.put(data, function(err, response) {
+                if (err)
+                    return callback(err);
+                if (response)
+                    return callback(null, response);
+                }
+            );
+        }
+    }
+
+
 
   module.exports = dal;
