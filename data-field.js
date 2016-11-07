@@ -5,78 +5,84 @@ const personData = [{
     lastName: "neighbor",
     class: "touring",
     maker: "Honda",
-    year: "2003"
-  },{
+    year: "2003",
+    instock: "yes",
+    cost: "3,000"
+  ,{
     firstName: "Matt",
     lastName: "Rightside",
     class: "cruiser",
     maker: "Harley Davidson",
-    year: "2010"
+    year: "2010",
+    instock: "yes",
+    cost: "13,000"
   },{
     firstName: "Josh",
     lastName: "Farside",
     class: "scooter",
     maker: "Honda",
-    year: "2015"
+    year: "2015",
+    instock: "yes",
+    cost: "8,000"
   },{
     firstName: "Kendra",
     lastName: "Kitkat",
     class: "scooter",
     maker: "Vespa",
-    year: "2011"
+    year: "2011",
+    instock: "yes",
+    cost: "5,000"
   },{
     firstName: "Cameron",
     lastName: "KillaCam",
     class: "cruiser",
     maker: "Harley Davidson",
-    year: "2008"
+    year: "2008",
+    instock: "yes",
+    cost: "5,000"
   },{
     firstName: "Jared",
     lastName: "frontside",
     class: "sportbike",
     maker: "suzuki",
-    year: "2014"
+    year: "2014",
+    instock: "yes",
+    cost: 15,000
   },{
     firstName: "Derek",
     lastName: "Guruada",
     class: "scooter",
     maker: "Vespa",
-    year: "2010"
+    year: "2010",
+    instock: "no",
+    cost: "6,000"
   },{
     firstName: "Andrea",
     lastName: "Ohio",
     class: "sportbike",
     maker: "suzuki",
     year: "2016"
+    instock: "no",
+    cost: "20,000"
   },{
     firstName: "Alex",
     lastName: "Longhair",
     class: "touring",
     maker: "Honda",
-    year: "2009"
+    year: "2009",
+    instock: "no"
+    cost: "5,500"
   },{
     firstName: "Chris",
     lastName: "Cortes",
     class: "sportbike",
     maker: "suzuki",
-    year: "2016"
+    year: "2016",
+    instock: "yes",
+    cost: "18,000"
 }];
 
-const classData = [
-    {
-        class: "touring",
-        class: "sportbike",
-        class: "scooter",
-        class: "cruiser"
-    }
-]
 
-const makerData = [{
-  maker: "suzuki",
-  maker: "Honda",
-  maker: "Vespa",
-  maker: "Harley Davidson"
-}]
 
 function callback(msgHeader) {
     return function(err, response) {
@@ -88,12 +94,4 @@ function callback(msgHeader) {
 
 personData.forEach(function(person) {
   dal.createPerson(person, callback('PERSON CREATED:\n'))
-});
-
-classData.forEach(function(classData) {
-    dal.createClass(classData, callback('CLASS CREATED:\n'))
-});
-
-makerData.forEach(function(makerData) {
-    dal.createMaker(makerData, callback('Maker CREATED:\n'))
 });

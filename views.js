@@ -38,14 +38,14 @@ var designDoc3 ={
     }
   }
 }
-dalNoSQL.createView(designDoc, function callback(err, data) {
+dal.createView(designDoc, function callback(err, data) {
     if (err) return console.log(err);
     if (data) {
         console.log(data);
     }
 })
 
-dalNoSQL.createView(designDoc2, function callback(err, data) {
+dal.createView(designDoc2, function callback(err, data) {
     if (err) return console.log(err);
     if (data) {
         console.log(data);
@@ -53,7 +53,7 @@ dalNoSQL.createView(designDoc2, function callback(err, data) {
 })
 
 
-dalNoSQL.createView(designDoc3, function callback(err, data) {
+dal.createView(designDoc3, function callback(err, data) {
     if (err) return console.log(err);
     if (data) {
         console.log(data);
